@@ -29,12 +29,13 @@ scope = "/subscriptions/b1db2d61-6edf-4e6f-b42f-286904728d93/resourceGroups/Offi
 | Name              | Description                                                                      | Type   | Default | Required |
 |-------------------|----------------------------------------------------------------------------------|--------|---------|----------|
 | allowed_locations | The list of locations that can be specified when deploying resources             | list   | n/a     | yes      |
-| subscriptions     | A list of subscriptions to apply the policy                                      | list   | n/a     | yes      |
+| subscription      | A subscription to apply the policy                                               | string | n/a     | yes      |
 
 
 ## Example
 
-terraform plan -var 'location=["westus2","westus"]' -var 'subscription=["b1db2d61-6edf-4e6f-b42f-286904728d93"]'
+terraform plan -var 'location=["westus2","westus"]' 
+terraform apply -var 'location=["westus2","westus"]' 
+terraform destroy -var 'location=["westus2","westus"]' 
 
-Sign in using az login from Powershell is required to run the main.tf 
 

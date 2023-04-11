@@ -9,11 +9,20 @@ terraform {
 
 provider "azurerm" {
   features {}
+
+  # More information on the authentication methods supported by
+  # the AzureRM Provider can be found here:
+  # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs
+
+  tenant_id       = var.tenant_id
+  client_id       = var.client_id
+  client_secret   = var.client_secret
+  subscription_id = var.subscription_id
 }
 
 resource "azurerm_policy_definition" "policy" {
   name         = "allowedlocations"
-  policy_type  = "BuiltIn"
+  policy_type  = "Custom"
   mode         = "Indexed"
   display_name = var.name
   description  = "This policy enables you to restrict the locations your organization can specify when deploying resources. Use to enforce your geo-compliance requirements. Excludes resource groups, Microsoft.AzureActiveDirectory/b2cDirectories, and resources that use the 'global' region."
@@ -29,7 +38,7 @@ policy_rule = <<POLICY_RULE
         "allOf": [
           {
             "field": "location",
-            "notIn": "[parameters('listOfAllowedLocations')]"
+            "notIn": "[parameters('location')]"
           },
           {
             "field": "location",
@@ -48,7 +57,7 @@ policy_rule = <<POLICY_RULE
 POLICY_RULE
 parameters = <<PARAMETERS
   {
-      "listOfAllowedLocations": {
+      "location": {
         "type": "Array",
         "metadata": {
           "description": "The list of locations that can be specified when deploying resources.",
@@ -58,4 +67,15 @@ parameters = <<PARAMETERS
       }
     }
 PARAMETERS
+}
+
+resource "azurerm_subscription_policy_assignment" "policy_assignment" {
+  name                 = var.assign_name
+  policy_definition_id = azurerm_policy_definition.policy.id
+  display_name         = var.assign_name
+  subscription_id      = "/subscriptions/${var.subscription_id}"
+  parameters = jsonencode({
+  location = {
+    value = var.location
+  }})
 }
